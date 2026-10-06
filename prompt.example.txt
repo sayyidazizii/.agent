@@ -1,22 +1,50 @@
 ================================================================================
-KUMPULAN CONTOH PERINTAH CLI (ANTIGRAVITY CLI)
+CONTOH PERINTAH CLI (UNIVERSAL AI AGENT: AGY / CLAUDE / KIRO / DLL)
 ================================================================================
 
-NOTE :  simpan metode seperti ini `Set-Content -Path .git\info\exclude -Value ".agent/" -Encoding ASCII` atau ".claude/",  ".kiro/"
+[NOTE: PENGAMANAN GIT LOKAL]
+Jalankan salah satu perintah ini di PowerShell agar folder agent tidak ter-commit:
+- Untuk folder universal : Set-Content -Path .git\info\exclude -Value ".agent/" -Encoding ASCII
 
+
+--------------------------------------------------------------------------------
 1. MODE AMAN / PERENCANAAN (DRY-RUN) - [Sangat Direkomendasikan]
 AI menganalisis task, membuat rencana perubahan, dan menyusun threat model tanpa mengubah file asli:
 --------------------------------------------------------------------------------
 agy "Baca spesifikasi di .agent/task.md. Buat execution plan dan threat model sesuai .agent/skills/security-audit.md. JANGAN ubah file apa pun sebelum saya konfirmasi."
 
 
-2. MODE EKSEKUSI PENUH (EXECUTE & SELF-AUDIT)
-AI langsung memodifikasi target file, menerapkan guardrails, dan menyajikan tabel hasil audit:
 --------------------------------------------------------------------------------
-agy "Eksekusi seluruh instruksi di .agent/task.md. Patuhi aturan di .agent/rules/security-guardrails.md dan tampilkan audit summary dari .agent/skills/security-audit.md sebelum selesai."
+2. MODE EKSEKUSI PENUH (EXECUTE & SELF-AUDIT)
+AI langsung memodifikasi target file, menerapkan guardrails, mencatat log, dan menyajikan audit summary:
+--------------------------------------------------------------------------------
+agy "Eksekusi seluruh instruksi di .agent/task.md. Patuhi aturan di .agent/rules/security-guardrails.md dan tampilkan audit summary serta catat log sesuai .agent/skills/security-audit.md sebelum selesai."
 
 
+--------------------------------------------------------------------------------
 3. MODE AUDIT PERUBAHAN MANUAL (DIFF REVIEW)
 Gunakan mode ini jika Anda baru saja menulis kode sendiri dan ingin AI mengaudit keamanannya:
 --------------------------------------------------------------------------------
 agy "Audit perubahan git terkini menggunakan aturan di .agent/rules/security-guardrails.md dan checklist di .agent/skills/security-audit.md."
+
+
+--------------------------------------------------------------------------------
+4. ALUR TRIAGE & DRAFT SPEC TERKONTROL (INVESTIGASI ➔ DRAFT ➔ EKSEKUSI)
+Gunakan alur ini jika Anda punya error log atau ide fitur mentah yang belum jelas file mana saja yang terdampak:
+--------------------------------------------------------------------------------
+
+[TAHAP A: INVESTIGASI ERROR MENTAH (JANGAN EDIT KODE DULU)]
+agy "Ada error berikut: [paste error/stacktrace di sini]. Analisis root cause dan sebutkan file target yang perlu diperbaiki. JANGAN ubah file apa pun."
+
+   -- ATAU UNTUK IDE FITUR BARU MENTAH --
+agy "Saya ingin membuat fitur: [jelaskan ide fitur Anda secara bebas]. Analisis arsitektur terbaik dan sebutkan file apa saja yang harus dibuat/diubah. JANGAN buat/ubah file dulu."
+
+
+[TAHAP B: MINTA AI MEMBUATKAN DRAFT FORMAT .agent/task.md]
+agy "Bagus. Sekarang buatkan draft isi untuk file .agent/task.md berdasarkan analisismu tadi. Cantumkan Target Files spesifik, Goals terstruktur, dan directivenya."
+(Lalu copy hasil draft dari terminal dan simpan ke file .agent/task.md)
+
+
+[TAHAP C: EKSEKUSI DARI task.md YANG SUDAH DIREVIEW]
+agy "Eksekusi seluruh instruksi di .agent/task.md. Patuhi .agent/rules/security-guardrails.md dan catat riwayatnya di .agent/logs/execution.log."
+================================================================================
