@@ -186,6 +186,3 @@ Fitur pada [`logs/logs.html`](file:///D:/PROJECT%20TESTING/.agent/logs/logs.html
 * **Auto-Fetch / Manual Select**: Otomatis membaca `execution.log` jika dibuka via local web server, atau mendukung pemilihan file manual jika dibuka langsung melalui `file:///` di browser yang memiliki batasan CORS.
 
 ---
-
-## 📄 Lisensi
-Framework ini bersifat terbuka di bawah lisensi [MIT](LICENSE). Bebas digunakan, dimodifikasi, dan didistribusikan untuk proyek pribadi maupun enterprise.
