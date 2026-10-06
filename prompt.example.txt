@@ -1,57 +1,54 @@
-================================================================================
-CONTOH PERINTAH CLI (UNIVERSAL AI AGENT: AGY / CLAUDE / KIRO / DLL)
-================================================================================
+# STRICT SECURITY, PERFORMANCE & REGRESSION GUARDRAILS (ZERO-TRUST)
 
-[NOTE: PENGAMANAN GIT LOKAL]
-Jalankan perintah ini di PowerShell agar seluruh folder agent tidak ter-commit:
-Set-Content -Path .git\info\exclude -Value ".agent/" -Encoding ASCII
+You must strictly adhere to the following negative constraints and prohibitions during any code generation, refactoring, or modification. Any violation will result in task rejection.
 
-[SETUP FOLDER TASK (Cukup Sekali)]:
-New-Item -ItemType Directory -Force -Path .agent\tasks
+## 1. SECRETS & CREDENTIALS
+- STRICTLY PROHIBITED: Hardcoding credentials, API keys, private tokens, passwords, JWT secrets, encryption keys, or connection strings into source code.
+- Always use environment variables, secret managers, or designated configuration stores.
 
+## 2. FILE HANDLING & SANITIZATION (STRICT ZERO-TRUST)
+- STRICTLY PROHIBITED: Using user-supplied filenames directly in filesystem operations. Filenames must be sanitized or replaced with cryptographically secure identifiers (e.g., UUIDv4, ULID, or nanoid).
+- STRICTLY PROHIBITED: Relying solely on client-supplied MIME types (`Content-Type` header) or file extensions. File uploads MUST be validated using magic bytes/file signatures.
+- STRICTLY PROHIBITED: Storing uploaded files inside public or web-executable directories. Files must be stored outside web root or in object storage (S3/GCS) with execution permissions explicitly stripped (`chmod 0644` or non-executable flags).
+- STRICTLY PROHIBITED: Unsafe archive extraction (Zip Slip vulnerability). Path resolutions during decompression must be validated to never escape the designated target directory.
+- STRICTLY PROHIBITED: Processing files without size limits, memory thresholds, and stream controls (prevent DoS and Decompression Bombs).
 
---------------------------------------------------------------------------------
-1. MODE AMAN / PERENCANAAN (DRY-RUN) - [Sangat Direkomendasikan]
-AI menganalisis task spesifik, membuat rencana perubahan, dan menyusun threat model tanpa mengubah file asli:
---------------------------------------------------------------------------------
-agy "Baca spesifikasi di .agent/tasks/task-[NAMA-FILE].md. Buat execution plan dan threat model sesuai .agent/skills/security-audit.md. JANGAN ubah file apa pun sebelum saya konfirmasi."
+## 3. STRICT INPUT VALIDATION & WHITELISTING
+- STRICTLY PROHIBITED: Using blacklist-based filtering. All inputs must adhere to an EXPLICIT ALLOWLIST (positive security model) via strict schemas (e.g., Zod, Joi, Pydantic, typed DTOs).
+- STRICTLY PROHIBITED: Loose type conversions or unconstrained wildcards in schemas (e.g., untyped `any`, unvalidated JSON blobs, loose dicts).
+- STRICTLY PROHIBITED: Bypassing boundary sanitization. All incoming data (URL parameters, headers, query strings, cookies, request body) must be strictly validated before touching application logic.
 
+## 4. ARBITRARY BEHAVIOR PREVENTION (RCE, ARBITRARY READ/WRITE, SSRF)
+- STRICTLY PROHIBITED: Arbitrary File Read/Write/Delete. User input must never determine base paths. Always canonicalize paths and assert that `path.resolve(baseDir, inputPath).startsWith(baseDir)`.
+- STRICTLY PROHIBITED: Dynamic code execution (e.g., `eval()`, `exec()`, `child_process.exec()` with unsanitized arguments, or `dangerouslySetInnerHTML`).
+- STRICTLY PROHIBITED: Dynamic imports or module loading based on user input (e.g., dynamic `require(userInput)`, `import(userInput)`).
+- STRICTLY PROHIBITED: Insecure deserialization of untrusted payloads (e.g., unsafe YAML loaders like `yaml.load()`, Python `pickle`, Java/PHP native serialization, or `node-serialize`).
+- STRICTLY PROHIBITED: Arbitrary Outbound Requests (SSRF). Outbound HTTP requests using user-supplied URLs must strictly block private IP ranges (RFC 1918, `127.0.0.1`, `::1`, and cloud metadata endpoints such as `169.254.169.254`) and enforce protocol allowlisting (`https:` only).
 
---------------------------------------------------------------------------------
-2. MODE EKSEKUSI PENUH (EXECUTE & SELF-AUDIT)
-AI langsung memodifikasi target file, menerapkan guardrails, mencatat log, dan menyajikan audit summary:
---------------------------------------------------------------------------------
-agy "Eksekusi seluruh instruksi di .agent/tasks/task-[NAMA-FILE].md. Patuhi aturan di .agent/rules/security-guardrails.md dan tampilkan audit summary serta catat log sesuai .agent/skills/security-audit.md sebelum selesai."
+## 5. DATABASE & INJECTION DEFENSES
+- STRICTLY PROHIBITED: Unsanitized raw database queries or string concatenation in queries (prevent SQL/NoSQL/ORM Injection). Always use parameterized bindings or safe ORM methods.
+- STRICTLY PROHIBITED: Leaking stack traces, file system paths, or raw database errors in client-facing HTTP/API responses.
 
+## 6. EFFICIENCY & PERFORMANCE
+- STRICTLY PROHIBITED: Suboptimal algorithms (e.g., nested O(N^2) loops where O(N) or O(log N) hash maps/indexing can be used).
+- STRICTLY PROHIBITED: Resource and memory leaks (unclosed streams, unreleased locks, hanging event listeners, unclosed database sessions).
+- STRICTLY PROHIBITED: Blocking synchronous I/O operations inside asynchronous or high-throughput request cycles.
+- STRICTLY PROHIBITED: Adding bloated third-party dependencies when native language features or existing project utilities suffice.
 
---------------------------------------------------------------------------------
-3. MODE AUDIT PERUBAHAN MANUAL (DIFF REVIEW)
-Gunakan mode ini jika Anda baru saja menulis kode sendiri dan ingin AI mengaudit keamanannya:
---------------------------------------------------------------------------------
-agy "Audit perubahan git terkini menggunakan aturan di .agent/rules/security-guardrails.md dan checklist di .agent/skills/security-audit.md."
+## 7. CODE INTEGRITY & ZERO REGRESSION
+- STRICTLY PROHIBITED: Modifying or deleting unrelated files, interfaces, or working features outside the explicit target scope.
+- STRICTLY PROHIBITED: Using hallucinated, unverified, or deprecated third-party packages.
+- Always maintain backwards compatibility of existing APIs and public contracts.
 
+## 8. VERSION CONTROL & GIT OPERATIONS (STRICT BOUNDARY)
+- STRICTLY PROHIBITED: Running `git commit`, `git push`, or modifying remote branches under any circumstances without explicit, written confirmation from the user.
+- STRICTLY PROHIBITED: Running destructive Git commands that can erase uncommitted work (e.g., `git reset --hard`, `git clean -fd`, `git checkout -- .`, `git restore .`).
+- Permitted Git actions are READ-ONLY: You are ONLY allowed to inspect Git state using `git status`, `git diff`, and `git log` to review your own changes.
+- Final commit and push actions MUST ALWAYS be left to the human developer.
 
---------------------------------------------------------------------------------
-4. ALUR TRIAGE & AUTO-GENERATE TASK (INVESTIGASI ➔ GENERATE DRAF ➔ EKSEKUSI)
-Gunakan alur ini jika ada error baru atau ide fitur yang belum jelas file mana saja yang terdampak:
---------------------------------------------------------------------------------
-
-[TAHAP A: INVESTIGASI ERROR MENTAH (JANGAN EDIT KODE DULU)]
-agy "Ada error berikut: [paste error/stacktrace di sini]. Analisis root cause dan sebutkan file target yang perlu diperbaiki. JANGAN ubah file apa pun."
-
-   -- ATAU UNTUK IDE FITUR BARU MENTAH --
-agy "Saya ingin membuat fitur: [jelaskan ide fitur Anda secara bebas]. Analisis arsitektur terbaik dan sebutkan file apa saja yang harus dibuat/diubah. JANGAN buat/ubah file dulu."
-
-
-[TAHAP B: AI OTOMATIS MEMBUAT FILE TASK CHRONOLOGICAL]
-agy "Bagus. Sekarang Buat file baru langsung di dalam folder .agent/tasks/ dengan nama format task-YYYY-MM-DD-HHmm-[slug-singkat].md. Isi dengan Target Files spesifik, Goals terstruktur, dan batasan directive dari analisismu tadi."
-
-(AI akan otomatis membuat file, contoh: .agent/tasks/task-2026-10-06-1215-fix-shift.md. Buka dan review sebentar file tersebut di VS Code).
-
-
-[TAHAP C: EKSEKUSI DARI FILE TASK YANG BARU SAJA DIBUAT]
-agy "Eksekusi file .agent/tasks/task-[NAMA-FILE-TADI].md. Patuhi .agent/rules/security-guardrails.md dan catat riwayatnya di .agent/logs/execution.log."
-
-   -- CARA CEPAT (EKSEKUSI TASK PALING BARU SECARA OTOMATIS) --
-agy "Baca file task paling baru di dalam folder .agent/tasks/, lalu eksekusi instruksinya sesuai .agent/rules/security-guardrails.md dan catat riwayatnya ke log."
-================================================================================
+## 9. BUSINESS LOGIC, ACCESS CONTROL & CRYPTO HARDENING
+- STRICTLY PROHIBITED (IDOR/BOLA): Querying or mutating user-scoped resources by raw ID without asserting tenant or ownership boundaries (Always scope queries by the authenticated user's ID or enforce strict Policy/Gate authorization).
+- STRICTLY PROHIBITED (Mass Assignment): Passing raw request arrays directly to model creation or updates (e.g., NEVER use `$request->all()` in `create()` or `update()`). Always use validated, explicitly mapped fields (`$request->validated()`).
+- STRICTLY PROHIBITED: Using standard string comparison operators (`===` or `==`) for sensitive token, HMAC, or password signature comparisons. ALWAYS use constant-time comparison functions (e.g., `hash_equals()`).
+- STRICTLY PROHIBITED: Unprotected concurrent operations on critical state changes. State mutations (e.g., balance deduction, one-time claim, or single-action submissions) MUST use database transactions with pessimistic locking (`lockForUpdate()`) or atomic state assertions.
+- STRICTLY PROHIBITED: Using insecure pseudo-random generators (e.g., `rand()`, `mt_rand()`, `Math.random()`) for security-sensitive tokens, reset links, or identifiers. ALWAYS use cryptographically secure random generators (`random_bytes()`, `Str::random()`).
