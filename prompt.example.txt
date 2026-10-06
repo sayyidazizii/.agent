@@ -32,7 +32,7 @@ agy "Audit perubahan git terkini menggunakan aturan di .agent/rules/security-gua
 
 
 --------------------------------------------------------------------------------
-4. ALUR TRIAGE & AUTO-GENERATE TASK (INVESTIGASI ➔ GENERATE DRAF WIB ➔ EKSEKUSI)
+4. ALUR TRIAGE & AUTO-GENERATE TASK (INVESTIGASI ➔ GENERATE DRAF ➔ EKSEKUSI)
 Gunakan alur ini jika ada error baru atau ide fitur yang belum jelas file mana saja yang terdampak:
 --------------------------------------------------------------------------------
 
@@ -43,8 +43,8 @@ agy "Ada error berikut: [paste error/stacktrace di sini]. Analisis root cause da
 agy "Saya ingin membuat fitur: [jelaskan ide fitur Anda secara bebas]. Analisis arsitektur terbaik dan sebutkan file apa saja yang harus dibuat/diubah. JANGAN buat/ubah file dulu."
 
 
-[TAHAP B: AI OTOMATIS MEMBUAT FILE TASK CHRONOLOGICAL (WAKTU WIB)]
-agy "Bagus. Sekarang periksa jam sistem lokal komputer (Waktu Indonesia Barat / WIB). Buat file baru langsung di dalam folder .agent/tasks/ dengan nama format task-YYYY-MM-DD-HHmm-[slug-singkat].md. Isi dengan Target Files spesifik, Goals terstruktur, dan batasan directive dari analisismu tadi."
+[TAHAP B: AI OTOMATIS MEMBUAT FILE TASK CHRONOLOGICAL]
+agy "Bagus. Sekarang Buat file baru langsung di dalam folder .agent/tasks/ dengan nama format task-YYYY-MM-DD-HHmm-[slug-singkat].md. Isi dengan Target Files spesifik, Goals terstruktur, dan batasan directive dari analisismu tadi."
 
 (AI akan otomatis membuat file, contoh: .agent/tasks/task-2026-10-06-1215-fix-shift.md. Buka dan review sebentar file tersebut di VS Code).
 
