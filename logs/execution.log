@@ -1,0 +1,7 @@
+| Timestamp | Task Name | Status | Duration | Security Audit | Summary / Root Cause |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 2026-10-06 09:30 | Setup File Upload Service | SUCCESS | 45s | PASS | Implementasi endpoint upload file dengan validasi magic bytes (PNG/PDF) dan penyimpanan UUID di luar webroot |
+| 2026-10-06 10:05 | User Authentication & JWT Refresh | SUCCESS | 1m 12s | PASS | Implementasi schema validasi Zod, query SQL parameterized, dan penghapusan password hash dari response |
+| 2026-10-06 10:40 | Archive Decompression Utility | FAILED | 35s | FAIL | Ditolak: Terdeteksi potensi Zip Slip vulnerability pada path ekstraksi arsip tanpa verifikasi canonical path |
+| 2026-10-06 11:00 | Fix Archive Decompression (Zip Slip) | SUCCESS | 28s | PASS | Memperbaiki validasi canonical path menggunakan path.resolve boundary check dan isolasi target directory |
+| 2026-10-06 11:15 | External Webhook Dispatcher | SUCCESS | 50s | PASS | Enforce SSRF protection: memblokir private IP (RFC 1918, 127.0.0.1, 169.254.169.254) dan membatasi protokol ke HTTPS |
