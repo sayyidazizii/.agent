@@ -39,3 +39,9 @@ You must strictly adhere to the following negative constraints and prohibitions 
 - STRICTLY PROHIBITED: Modifying or deleting unrelated files, interfaces, or working features outside the explicit target scope.
 - STRICTLY PROHIBITED: Using hallucinated, unverified, or deprecated third-party packages.
 - Always maintain backwards compatibility of existing APIs and public contracts.
+
+## 8. VERSION CONTROL & GIT OPERATIONS (STRICT BOUNDARY)
+- STRICTLY PROHIBITED: Running `git commit`, `git push`, or modifying remote branches under any circumstances without explicit, written confirmation from the user.
+- STRICTLY PROHIBITED: Running destructive Git commands that can erase uncommitted work (e.g., `git reset --hard`, `git clean -fd`, `git checkout -- .`, `git restore .`).
+- Permitted Git actions are READ-ONLY: You are ONLY allowed to inspect Git state using `git status`, `git diff`, and `git log` to review your own changes.
+- Final commit and push actions MUST ALWAYS be left to the human developer.

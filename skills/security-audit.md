@@ -5,6 +5,7 @@ Execute this mandatory verification protocol whenever reviewing, generating, or 
 ## STEP 1: SCOPE BOUNDARY CHECK
 - Confirm that all modifications are strictly confined to the files specified in the task whitelist.
 - If an unlisted file was modified, revert it immediately or pause to request explicit confirmation.
+- [ ] Git State Check: Confirm NO unapproved `git commit` or `git push` was executed during this session.
 
 ## STEP 2: THREAT MODELING & VULNERABILITY AUDIT
 Inspect your generated diff against the following vectors:
