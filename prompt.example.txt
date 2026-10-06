@@ -3,22 +3,25 @@ CONTOH PERINTAH CLI (UNIVERSAL AI AGENT: AGY / CLAUDE / KIRO / DLL)
 ================================================================================
 
 [NOTE: PENGAMANAN GIT LOKAL]
-Jalankan salah satu perintah ini di PowerShell agar folder agent tidak ter-commit:
-- Untuk folder universal : Set-Content -Path .git\info\exclude -Value ".agent/" -Encoding ASCII
+Jalankan perintah ini di PowerShell agar seluruh folder agent tidak ter-commit:
+Set-Content -Path .git\info\exclude -Value ".agent/" -Encoding ASCII
+
+[SETUP FOLDER TASK (Cukup Sekali)]:
+New-Item -ItemType Directory -Force -Path .agent\tasks
 
 
 --------------------------------------------------------------------------------
 1. MODE AMAN / PERENCANAAN (DRY-RUN) - [Sangat Direkomendasikan]
-AI menganalisis task, membuat rencana perubahan, dan menyusun threat model tanpa mengubah file asli:
+AI menganalisis task spesifik, membuat rencana perubahan, dan menyusun threat model tanpa mengubah file asli:
 --------------------------------------------------------------------------------
-agy "Baca spesifikasi di .agent/task.md. Buat execution plan dan threat model sesuai .agent/skills/security-audit.md. JANGAN ubah file apa pun sebelum saya konfirmasi."
+agy "Baca spesifikasi di .agent/tasks/task-[NAMA-FILE].md. Buat execution plan dan threat model sesuai .agent/skills/security-audit.md. JANGAN ubah file apa pun sebelum saya konfirmasi."
 
 
 --------------------------------------------------------------------------------
 2. MODE EKSEKUSI PENUH (EXECUTE & SELF-AUDIT)
 AI langsung memodifikasi target file, menerapkan guardrails, mencatat log, dan menyajikan audit summary:
 --------------------------------------------------------------------------------
-agy "Eksekusi seluruh instruksi di .agent/task.md. Patuhi aturan di .agent/rules/security-guardrails.md dan tampilkan audit summary serta catat log sesuai .agent/skills/security-audit.md sebelum selesai."
+agy "Eksekusi seluruh instruksi di .agent/tasks/task-[NAMA-FILE].md. Patuhi aturan di .agent/rules/security-guardrails.md dan tampilkan audit summary serta catat log sesuai .agent/skills/security-audit.md sebelum selesai."
 
 
 --------------------------------------------------------------------------------
@@ -29,8 +32,8 @@ agy "Audit perubahan git terkini menggunakan aturan di .agent/rules/security-gua
 
 
 --------------------------------------------------------------------------------
-4. ALUR TRIAGE & DRAFT SPEC TERKONTROL (INVESTIGASI ➔ DRAFT ➔ EKSEKUSI)
-Gunakan alur ini jika Anda punya error log atau ide fitur mentah yang belum jelas file mana saja yang terdampak:
+4. ALUR TRIAGE & AUTO-GENERATE TASK (INVESTIGASI ➔ GENERATE DRAF WIB ➔ EKSEKUSI)
+Gunakan alur ini jika ada error baru atau ide fitur yang belum jelas file mana saja yang terdampak:
 --------------------------------------------------------------------------------
 
 [TAHAP A: INVESTIGASI ERROR MENTAH (JANGAN EDIT KODE DULU)]
@@ -40,11 +43,15 @@ agy "Ada error berikut: [paste error/stacktrace di sini]. Analisis root cause da
 agy "Saya ingin membuat fitur: [jelaskan ide fitur Anda secara bebas]. Analisis arsitektur terbaik dan sebutkan file apa saja yang harus dibuat/diubah. JANGAN buat/ubah file dulu."
 
 
-[TAHAP B: MINTA AI MEMBUATKAN DRAFT FORMAT .agent/task.md]
-agy "Bagus. Sekarang buatkan draft isi untuk file .agent/task.md berdasarkan analisismu tadi. Cantumkan Target Files spesifik, Goals terstruktur, dan directivenya."
-(Lalu copy hasil draft dari terminal dan simpan ke file .agent/task.md)
+[TAHAP B: AI OTOMATIS MEMBUAT FILE TASK CHRONOLOGICAL (WAKTU WIB)]
+agy "Bagus. Sekarang periksa jam sistem lokal komputer (Waktu Indonesia Barat / WIB). Buat file baru langsung di dalam folder .agent/tasks/ dengan nama format task-YYYY-MM-DD-HHmm-[slug-singkat].md. Isi dengan Target Files spesifik, Goals terstruktur, dan batasan directive dari analisismu tadi."
+
+(AI akan otomatis membuat file, contoh: .agent/tasks/task-2026-10-06-1215-fix-shift.md. Buka dan review sebentar file tersebut di VS Code).
 
 
-[TAHAP C: EKSEKUSI DARI task.md YANG SUDAH DIREVIEW]
-agy "Eksekusi seluruh instruksi di .agent/task.md. Patuhi .agent/rules/security-guardrails.md dan catat riwayatnya di .agent/logs/execution.log."
+[TAHAP C: EKSEKUSI DARI FILE TASK YANG BARU SAJA DIBUAT]
+agy "Eksekusi file .agent/tasks/task-[NAMA-FILE-TADI].md. Patuhi .agent/rules/security-guardrails.md dan catat riwayatnya di .agent/logs/execution.log."
+
+   -- CARA CEPAT (EKSEKUSI TASK PALING BARU SECARA OTOMATIS) --
+agy "Baca file task paling baru di dalam folder .agent/tasks/, lalu eksekusi instruksinya sesuai .agent/rules/security-guardrails.md dan catat riwayatnya ke log."
 ================================================================================
