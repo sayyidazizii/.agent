@@ -1,0 +1,22 @@
+================================================================================
+KUMPULAN CONTOH PERINTAH CLI (ANTIGRAVITY CLI)
+================================================================================
+
+NOTE :  simpan metode seperti ini `Set-Content -Path .git\info\exclude -Value ".agent/" -Encoding ASCII` atau ".claude/",  ".kiro/"
+
+1. MODE AMAN / PERENCANAAN (DRY-RUN) - [Sangat Direkomendasikan]
+AI menganalisis task, membuat rencana perubahan, dan menyusun threat model tanpa mengubah file asli:
+--------------------------------------------------------------------------------
+agy "Baca spesifikasi di .agent/task.md. Buat execution plan dan threat model sesuai .agent/skills/security-audit.md. JANGAN ubah file apa pun sebelum saya konfirmasi."
+
+
+2. MODE EKSEKUSI PENUH (EXECUTE & SELF-AUDIT)
+AI langsung memodifikasi target file, menerapkan guardrails, dan menyajikan tabel hasil audit:
+--------------------------------------------------------------------------------
+agy "Eksekusi seluruh instruksi di .agent/task.md. Patuhi aturan di .agent/rules/security-guardrails.md dan tampilkan audit summary dari .agent/skills/security-audit.md sebelum selesai."
+
+
+3. MODE AUDIT PERUBAHAN MANUAL (DIFF REVIEW)
+Gunakan mode ini jika Anda baru saja menulis kode sendiri dan ingin AI mengaudit keamanannya:
+--------------------------------------------------------------------------------
+agy "Audit perubahan git terkini menggunakan aturan di .agent/rules/security-guardrails.md dan checklist di .agent/skills/security-audit.md."

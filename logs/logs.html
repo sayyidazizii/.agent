@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agent Execution Telemetry & Security Audit Log</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card-bg: #161b22;
+      --border: #30363d;
+      --text: #c9d1d9;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --success: #238636;
+      --danger: #da3633;
+      --warning: #d29922;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 24px;
+      line-height: 1.5;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+    }
+
+    h1 { font-size: 1.4rem; color: #f0f6fc; display: flex; align-items: center; gap: 8px; }
+    h1 span { font-size: 0.8rem; background: var(--border); padding: 2px 8px; border-radius: 12px; color: var(--accent); }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .stat-card h3 { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
+    .stat-card p { font-size: 1.8rem; font-weight: bold; }
+    .stat-card.success p { color: #3fb950; }
+    .stat-card.danger p { color: #f85149; }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    input[type="text"], select {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+    input[type="text"] { flex: 1; min-width: 200px; }
+
+    .btn {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    .btn:hover { background: var(--border); }
+    .btn-primary { background: var(--success); border-color: transparent; color: white; font-weight: bold; }
+    .btn-primary:hover { background: #2ea043; }
+
+    .table-container {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem; }
+    th {
+      background: #21262d;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      color: #f0f6fc;
+      font-weight: 600;
+    }
+    td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover { background: rgba(255, 255, 255, 0.02); }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .badge-success { background: rgba(35, 134, 54, 0.2); color: #3fb950; border: 1px solid rgba(63, 185, 80, 0.3); }
+    .badge-failed { background: rgba(218, 54, 51, 0.2); color: #f85149; border: 1px solid rgba(248, 81, 73, 0.3); }
+
+    .cors-alert {
+      display: none;
+      background: rgba(210, 153, 34, 0.15);
+      border: 1px solid var(--warning);
+      color: #e3b341;
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      font-size: 0.88rem;
+    }
+    .file-input-wrapper { display: inline-block; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>Agent Execution Dashboard </h1>
+    <div>
+      <button class="btn btn-primary" onclick="loadLogs()">🔄 Reload</button>
+    </div>
+  </header>
+
+  <div id="corsAlert" class="cors-alert">
+    ⚠️ <strong>Catatan Browser:</strong> Jika Anda membuka file ini dengan klik 2x (<code>file:///</code>), browser mungkin membatasi auto-fetch.
+    Silakan pilih file <code>execution.log</code> secara manual di sini:
+    <input type="file" id="manualFileInput" accept=".log,.txt,.md" style="margin-left: 8px;">
+  </div>
+
+  <!-- Statistik Header -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <h3>Total Runs</h3>
+      <p id="totalRuns">0</p>
+    </div>
+    <div class="stat-card success">
+      <h3>Success Rate</h3>
+      <p id="successRate">0%</p>
+    </div>
+    <div class="stat-card danger">
+      <h3>Failed Runs</h3>
+      <p id="failedRuns">0</p>
+    </div>
+    <div class="stat-card">
+      <h3>Security Checks Passed</h3>
+      <p id="securityPasses">0</p>
+    </div>
+  </div>
+
+  <!-- Filter & Search Controls -->
+  <div class="controls">
+    <input type="text" id="searchInput" placeholder="Cari nama task atau ringkasan..." oninput="renderTable()">
+    <select id="statusFilter" onchange="renderTable()">
+      <option value="ALL">Semua Status</option>
+      <option value="SUCCESS">Hanya SUCCESS</option>
+      <option value="FAILED">Hanya FAILED</option>
+    </select>
+  </div>
+
+  <!-- Table Container -->
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>Task Name</th>
+          <th>Status</th>
+          <th>Duration</th>
+          <th>Security Audit</th>
+          <th>Summary / Root Cause</th>
+        </tr>
+      </thead>
+      <tbody id="logTableBody">
+        <tr>
+          <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 32px;">Memuat riwayat eksekusi...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  let logsData = [];
+
+  async function loadLogs() {
+    try {
+      const response = await fetch('execution.log?t=' + new Date().getTime());
+      if (!response.ok) throw new Error('File tidak ditemukan');
+      const text = await response.text();
+      parseLogData(text);
+      document.getElementById('corsAlert').style.display = 'none';
+    } catch (err) {
+      console.warn('Auto-fetch gagal, mengaktifkan opsi manual (CORS):', err);
+      document.getElementById('corsAlert').style.display = 'block';
+    }
+  }
+
+  // Handle manual file selection jika dibuka via double-click file:///
+  document.getElementById('manualFileInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        parseLogData(evt.target.result);
+      };
+      reader.readAsText(file);
+    }
+  });
+
+  function parseLogData(content) {
+    const lines = content.split('\n');
+    logsData = [];
+
+    for (let line of lines) {
+      line = line.trim();
+      // Hanya parse baris tabel yang memiliki konten
+      if (!line.startsWith('|') || line.includes(':---') || line.includes('Task Name')) continue;
+
+      const cols = line.split('|').map(c => c.trim()).filter((_, idx, arr) => idx !== 0 && idx !== arr.length - 1);
+      if (cols.length >= 6) {
+        logsData.unshift({ // unshift agar riwayat terbaru berada di paling atas
+          timestamp: cols[0],
+          task: cols[1],
+          status: cols[2].toUpperCase(),
+          duration: cols[3],
+          security: cols[4].toUpperCase(),
+          summary: cols[5]
+        });
+      }
+    }
+    updateStats();
+    renderTable();
+  }
+
+  function updateStats() {
+    const total = logsData.length;
+    const successCount = logsData.filter(d => d.status.includes('SUCCESS')).length;
+    const failedCount = logsData.filter(d => d.status.includes('FAILED')).length;
+    const secPassCount = logsData.filter(d => d.security.includes('PASS')).length;
+
+    document.getElementById('totalRuns').innerText = total;
+    document.getElementById('failedRuns').innerText = failedCount;
+    document.getElementById('securityPasses').innerText = secPassCount;
+    document.getElementById('successRate').innerText = total > 0 ? Math.round((successCount / total) * 100) + '%' : '0%';
+  }
+
+  function renderTable() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const filterStatus = document.getElementById('statusFilter').value;
+    const tbody = document.getElementById('logTableBody');
+
+    const filtered = logsData.filter(d => {
+      const matchesSearch = d.task.toLowerCase().includes(searchTerm) || d.summary.toLowerCase().includes(searchTerm);
+      const matchesStatus = filterStatus === 'ALL' || d.status.includes(filterStatus);
+      return matchesSearch && matchesStatus;
+    });
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 24px;">Tidak ada log yang cocok.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(d => {
+      const isSuccess = d.status.includes('SUCCESS');
+      const isSecPass = d.security.includes('PASS');
+      return `
+        <tr>
+          <td style="color: var(--text-muted); white-space: nowrap;">${d.timestamp}</td>
+          <td><strong>${d.task}</strong></td>
+          <td><span class="badge ${isSuccess ? 'badge-success' : 'badge-failed'}">${d.status}</span></td>
+          <td style="color: var(--text-muted);">${d.duration}</td>
+          <td><span class="badge ${isSecPass ? 'badge-success' : 'badge-failed'}">${d.security}</span></td>
+          <td>${d.summary}</td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  // Load awal
+  loadLogs();
+</script>
+</body>
+</html>
